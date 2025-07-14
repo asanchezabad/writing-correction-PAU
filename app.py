@@ -44,7 +44,11 @@ if st.button("✅ Corregir"):
             st.error(resultado_json)
         else:
             try:
-                data = json.loads(resultado_json)
+                start = resultado_json.find('{')
+                end = resultado_json.rfind('}') + 1
+                json_str = resultado_json[start:end]
+                st.write("JSON detectado:", json_str)
+                data = json.loads(json_str)
                 
                 st.subheader("📊 Resultado de la rúbrica")
                 criterios = {
