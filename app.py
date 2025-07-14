@@ -22,7 +22,7 @@ def evaluar_rubrica_con_gpt(text):
         return "❌ OpenAI API key no configurada."
 
     prompt = f"""
-Eres un profesor que evalúa un writing en inglés con esta rúbrica (puntuaciones máximas indicadas):
+Eres un profesor que evalúa un writing en inglés nivel B2 con esta rúbrica (puntuaciones máximas indicadas):
 
 ADECUACIÓN (máximo 1.5 puntos)
 - Cumplimiento de la tarea, registro y extensión (0.5)
@@ -76,7 +76,6 @@ if st.button("✅ Corregir"):
         st.warning("⚠️ Por favor, introduce un texto para corregir.")
     else:
         resultado_json = evaluar_rubrica_con_gpt(texto_alumno)
-        st.write("Respuesta recibida:", resultado_json)
         if resultado_json.startswith("❌ OpenAI API error"):
             st.error(resultado_json)
         else:
@@ -84,7 +83,6 @@ if st.button("✅ Corregir"):
                 start = resultado_json.find('{')
                 end = resultado_json.rfind('}') + 1
                 json_str = resultado_json[start:end]
-                st.write("JSON detectado:", json_str)
                 data = json.loads(json_str)
                 
                 st.subheader("📊 Resultado de la rúbrica")
