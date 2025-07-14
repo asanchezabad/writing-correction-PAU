@@ -57,12 +57,11 @@ Devuelve la respuesta en este formato JSON:
 """
 
     response = openai.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "system", "content": "Eres un evaluador de writings."},
-                  {"role": "user", "content": prompt}],
-        temperature=0.2,
-        max_tokens=800,
-    )
+    model="gpt-3.5-turbo",
+    messages=[{"role": "user", "content": prompt}],
+    max_tokens=800,
+)
+
     return response.choices[0].message.content
 
 if st.button("✅ Corregir"):
