@@ -107,14 +107,15 @@ if st.button("✅ Corregir"):
 
                 st.success(f"✅ **Nota total: {round(total,2)} / 3**")
                 
-                st.subheader("📋 Errores detectados")
-st.info(data.get("Errores_Detectados", "No disponible"))
-
-st.subheader("📝 Feedback para el alumno")
-st.info(data.get("Feedback", "No disponible"))
+                st.markdown("""
+<div style='background-color:#e6ffe6; padding:15px; border-radius:12px; border: 2px solid green; font-size:16px;'>
+📝 <strong style='color:darkgreen;'>Feedback para el alumno:</strong>
+</div>""", unsafe_allow_html=True)
+st.write(data.get("Feedback", "No disponible"))
 
             except json.JSONDecodeError:
                 st.error("❌ Error: La respuesta de la IA no es un JSON válido.")
                 st.text(resultado_json)
             except Exception as e:
-                st.error(f"❌ Error inesperado: {e}")
+                    st.error(f"❌ Error inesperado: {e}")
+                    st.stop()
