@@ -3,8 +3,7 @@ import json
 
 try:
     import openai
-    import sys
-    st.write("OpenAI version:", sys.modules.get('openai').__version__ if 'openai' in sys.modules else "No importado")
+    st.write("OpenAI version:", getattr(openai, "__version__", "Desconocida"))
 except ModuleNotFoundError:
     st.error("❌ La librería 'openai' no está instalada. Añádela en requirements.txt con:\n\nopenai\n")
     st.stop()
