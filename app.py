@@ -37,6 +37,8 @@ EXPRESIÓN (máximo 1.5 puntos)
 Evalúa el texto siguiente y asigna una nota **(0, 0.25 o 0.5)** para cada criterio según los errores detectados.
 IMPORTANTE: No añadas explicaciones ni texto antes o después del JSON. Devuelve solo un objeto JSON válido, sin formato adicional.
 
+Además, para cada criterio, incluye en "Justificaciones" los errores concretos que observas y en "Feedback" escribe un texto largo explicando cómo mejorar específicamente cada apartado.
+
 Texto: '''{text}'''
 
 {{
@@ -47,14 +49,14 @@ Texto: '''{text}'''
   "Expresion_Vocabulario": valor_numérico,
   "Expresion_Ortografia": valor_numérico,
   "Justificaciones": {{
-    "Cumplimiento": "texto",
-    "Variedad": "texto",
-    "Cohesion": "texto",
-    "Gramatica": "texto",
-    "Vocabulario": "texto",
-    "Ortografia": "texto"
+    "Cumplimiento": "errores detectados y explicación",
+    "Variedad": "errores detectados y explicación",
+    "Cohesion": "errores detectados y explicación",
+    "Gramatica": "errores detectados y explicación",
+    "Vocabulario": "errores detectados y explicación",
+    "Ortografia": "errores detectados y explicación"
   }},
-  "Feedback": "texto breve para el alumno"
+  "Feedback": "Texto detallado explicando cómo mejorar en cada criterio."
 }}
 """
 
@@ -63,7 +65,7 @@ Texto: '''{text}'''
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.0,
-            max_tokens=800,
+            max_tokens=1000,
         )
         return response.choices[0].message.content
     except openai.OpenAIError as e:
