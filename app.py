@@ -22,7 +22,7 @@ def evaluar_rubrica_con_gpt(text):
         return "❌ OpenAI API key no configurada."
 
     prompt = f"""
-Eres un profesor que evalúa un writing en inglés nivel B2 con esta rúbrica (puntuaciones máximas indicadas):
+Eres un profesor que evalúa un writing en inglés con esta rúbrica (puntuaciones máximas indicadas):
 
 ADECUACIÓN (máximo 1.5 puntos)
 - Cumplimiento de la tarea, registro y extensión (0.5)
