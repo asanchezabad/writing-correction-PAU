@@ -37,23 +37,23 @@ Luego, genera un feedback constructivo para que el alumno mejore.
 Texto: '''{text}'''
 
 Devuelve la respuesta en este formato JSON:
-{
+{{
   "Adecuacion_Cumplimiento": valor_numérico,
   "Adecuacion_Variedad": valor_numérico,
   "Adecuacion_Cohesion": valor_numérico,
   "Expresion_Gramatica": valor_numérico,
   "Expresion_Vocabulario": valor_numérico,
   "Expresion_Ortografia": valor_numérico,
-  "Justificaciones": {
+  "Justificaciones": {{
     "Cumplimiento": texto,
     "Variedad": texto,
     "Cohesion": texto,
     "Gramatica": texto,
     "Vocabulario": texto,
     "Ortografia": texto
-  },
+  }},
   "Feedback": texto
-}
+}}
 """
 
     response = openai.chat.completions.create(
