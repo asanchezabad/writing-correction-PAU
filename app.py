@@ -14,7 +14,7 @@ if not openai.api_key:
     st.stop()
 
 st.set_page_config(page_title="Corrección de Writings", page_icon="✍️")
-st.title("✍️ Corrección de Writings con IA y Rúbrica dinámica")
+st.title("✍️ PAU WRITINGS CORRECTION")
 texto_alumno = st.text_area("📄 Pega aquí el writing del alumno:", height=200)
 
 def evaluar_rubrica_con_gpt(text):
