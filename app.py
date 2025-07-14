@@ -56,6 +56,7 @@ Texto: '''{text}'''
     "Vocabulario": "errores detectados y explicación",
     "Ortografia": "errores detectados y explicación"
   }},
+  "Errores_Detectados": "Lista completa de errores cometidos por el alumno con ejemplos específicos y correcciones sugeridas.",
   "Feedback": "Texto detallado explicando cómo mejorar en cada criterio."
 }}
 """
@@ -106,8 +107,11 @@ if st.button("✅ Corregir"):
 
                 st.success(f"✅ **Nota total: {round(total,2)} / 3**")
                 
-                st.subheader("📝 Feedback para el alumno")
-                st.info(data.get("Feedback", "No disponible"))
+                st.subheader("📋 Errores detectados")
+st.info(data.get("Errores_Detectados", "No disponible"))
+
+st.subheader("📝 Feedback para el alumno")
+st.info(data.get("Feedback", "No disponible"))
 
             except json.JSONDecodeError:
                 st.error("❌ Error: La respuesta de la IA no es un JSON válido.")
