@@ -21,11 +21,48 @@ def evaluar_rubrica_con_gpt(text):
     if not openai.api_key:
         return "❌ OpenAI API key no configurada."
 
-    prompt = f"Evaluación writing:\n{text}"
+    prompt = f"""
+Eres un profesor que evalúa un writing en inglés con esta rúbrica (puntuaciones máximas indicadas):
+
+ADECUACIÓN (máximo 1.5 puntos)
+- Cumplimiento de la tarea, registro y extensión (0.5)
+- Variedad y organización de ideas (0.5)
+- Cohesión y coherencia (0.5)
+
+EXPRESIÓN (máximo 1.5 puntos)
+- Gramática y estructuras (0.5)
+- Vocabulario y riqueza léxica (0.5)
+- Ortografía y puntuación (0.5)
+
+Evalúa el texto siguiente y asigna una nota **(0, 0.25 o 0.5)** para cada criterio según los errores detectados.
+IMPORTANTE: No añadas explicaciones ni texto antes o después del JSON. Devuelve solo un objeto JSON válido, sin formato adicional.
+
+Texto: '''{text}'''
+
+{{
+  "Adecuacion_Cumplimiento": valor_numérico,
+  "Adecuacion_Variedad": valor_numérico,
+  "Adecuacion_Cohesion": valor_numérico,
+  "Expresion_Gramatica": valor_numérico,
+  "Expresion_Vocabulario": valor_numérico,
+  "Expresion_Ortografia": valor_numérico,
+  "Justificaciones": {{
+    "Cumplimiento": "texto",
+    "Variedad": "texto",
+    "Cohesion": "texto",
+    "Gramatica": "texto",
+    "Vocabulario": "texto",
+    "Ortografia": "texto"
+  }},
+  "Feedback": "texto breve para el alumno"
+}}
+"""
+
     try:
         response = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
+            temperature=0.0,
             max_tokens=800,
         )
         return response.choices[0].message.content
