@@ -119,13 +119,6 @@ if st.button("✅ Corregir"):
                 </div>""", unsafe_allow_html=True)
                 st.write(data.get("Feedback", "No disponible"))
 
-                
-                    st.markdown("""
-    <div style='background-color:#e6ffe6; padding:15px; border-radius:12px; border: 2px solid green; font-size:16px;'>
-    📝 <strong style='color:darkgreen;'>Feedback para el alumno:</strong>
-    </div>""", unsafe_allow_html=True)
-    st.write(data.get("Feedback", "No disponible"))
-
             except json.JSONDecodeError:
                 st.error("❌ Error: La respuesta de la IA no es un JSON válido.")
                 st.text(resultado_json)
