@@ -14,88 +14,57 @@ if not openai.api_key:
     st.stop()
 
 st.set_page_config(page_title="Corrección de Writings", page_icon="✍️")
-st.title("✍️ PAU WRITINGS CORRECTION")
+st.title("✍️ Corrección de Writings con IA y Rúbrica dinámica")
 texto_alumno = st.text_area("📄 Pega aquí el writing del alumno:", height=200)
 
 def evaluar_rubrica_con_gpt(text):
-    prompt = f"""
-Eres un profesor que evalúa un writing en inglés con esta rúbrica (puntuaciones máximas indicadas):
-
-ADECUACIÓN (máximo 1.5 puntos)
-- Cumplimiento de la tarea, registro y extensión (0.5)
-- Variedad y organización de ideas (0.5)
-- Cohesión y coherencia (0.5)
-
-EXPRESIÓN (máximo 1.5 puntos)
-- Gramática y estructuras (0.5)
-- Vocabulario y riqueza léxica (0.5)
-- Ortografía y puntuación (0.5)
-
-Evalúa el texto siguiente y asigna una nota **(0, 0.25 o 0.5)** para cada criterio según los errores detectados. Sé riguroso: baja la nota cuando haya errores significativos o repetidos.
-Luego, genera un feedback constructivo para que el alumno mejore.
-
-Texto: '''{text}'''
-
-Devuelve la respuesta en este formato JSON:
-{{
-  "Adecuacion_Cumplimiento": valor_numérico,
-  "Adecuacion_Variedad": valor_numérico,
-  "Adecuacion_Cohesion": valor_numérico,
-  "Expresion_Gramatica": valor_numérico,
-  "Expresion_Vocabulario": valor_numérico,
-  "Expresion_Ortografia": valor_numérico,
-  "Justificaciones": {{
-    "Cumplimiento": texto,
-    "Variedad": texto,
-    "Cohesion": texto,
-    "Gramatica": texto,
-    "Vocabulario": texto,
-    "Ortografia": texto
-  }},
-  "Feedback": texto
-}}
-"""
-
-    response = openai.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[{"role": "user", "content": prompt}],
-    max_tokens=800,
-)
-
-    return response.choices[0].message.content
+    import openai.error
+    prompt = f"Evaluación writing:\n{text}"
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=800,
+        )
+        return response.choices[0].message.content
+    except openai.OpenAIError as e:
+        return f"❌ OpenAI API error: {e}"
 
 if st.button("✅ Corregir"):
     if texto_alumno.strip() == "":
         st.warning("⚠️ Por favor, introduce un texto para corregir.")
     else:
         resultado_json = evaluar_rubrica_con_gpt(texto_alumno)
-        try:
-            data = json.loads(resultado_json)
-            
-            st.subheader("📊 Resultado de la rúbrica")
-            criterios = {
-                "Cumplimiento de la tarea": data["Adecuacion_Cumplimiento"],
-                "Variedad y organización": data["Adecuacion_Variedad"],
-                "Cohesión y coherencia": data["Adecuacion_Cohesion"],
-                "Gramática": data["Expresion_Gramatica"],
-                "Vocabulario": data["Expresion_Vocabulario"],
-                "Ortografía y puntuación": data["Expresion_Ortografia"]
-            }
+        if resultado_json.startswith("❌ OpenAI API error"):
+            st.error(resultado_json)
+        else:
+            try:
+                data = json.loads(resultado_json)
+                
+                st.subheader("📊 Resultado de la rúbrica")
+                criterios = {
+                    "Cumplimiento de la tarea": data["Adecuacion_Cumplimiento"],
+                    "Variedad y organización": data["Adecuacion_Variedad"],
+                    "Cohesión y coherencia": data["Adecuacion_Cohesion"],
+                    "Gramática": data["Expresion_Gramatica"],
+                    "Vocabulario": data["Expresion_Vocabulario"],
+                    "Ortografía y puntuación": data["Expresion_Ortografia"]
+                }
 
-            total = sum(criterios.values())
+                total = sum(criterios.values())
 
-            for criterio, nota in criterios.items():
-                st.write(f"**{criterio}: {nota} / 0.5**")
-                st.progress(min(nota / 0.5, 1.0))
-                st.caption(data["Justificaciones"].get(criterio.split()[0], ""))
+                for criterio, nota in criterios.items():
+                    st.write(f"**{criterio}: {nota} / 0.5**")
+                    st.progress(min(nota / 0.5, 1.0))
+                    st.caption(data["Justificaciones"].get(criterio.split()[0], ""))
 
-            st.success(f"✅ **Nota total: {round(total,2)} / 3**")
-            
-            st.subheader("📝 Feedback para el alumno")
-            st.info(data["Feedback"])
+                st.success(f"✅ **Nota total: {round(total,2)} / 3**")
+                
+                st.subheader("📝 Feedback para el alumno")
+                st.info(data["Feedback"])
 
-        except json.JSONDecodeError:
-            st.error("❌ Error: La respuesta de la IA no es un JSON válido.")
-            st.text(resultado_json)
-        except Exception as e:
-            st.error(f"❌ Error inesperado: {e}")
+            except json.JSONDecodeError:
+                st.error("❌ Error: La respuesta de la IA no es un JSON válido.")
+                st.text(resultado_json)
+            except Exception as e:
+                st.error(f"❌ Error inesperado: {e}")
