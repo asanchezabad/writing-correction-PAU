@@ -57,7 +57,7 @@ Devuelve la respuesta en este formato JSON:
 }
 """
 
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "system", "content": "Eres un evaluador de writings."},
                   {"role": "user", "content": prompt}],
