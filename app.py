@@ -18,7 +18,6 @@ st.title("✍️ Corrección de Writings con IA y Rúbrica dinámica")
 texto_alumno = st.text_area("📄 Pega aquí el writing del alumno:", height=200)
 
 def evaluar_rubrica_con_gpt(text):
-    import openai.error
     prompt = f"Evaluación writing:\n{text}"
     try:
         response = openai.chat.completions.create(
