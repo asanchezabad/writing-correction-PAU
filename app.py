@@ -24,7 +24,7 @@ texto_alumno = st.text_area("📄 Pega aquí el writing del alumno:", height=200
 
 def evaluar_rubrica_con_gpt(texto_alumno):
     prompt = f"""
-Eres un profesor de inglés. Evalúa el siguiente writing para un nivel B1-B2. Evalúa de forma realista y crítica. No asignes 0.5 a un criterio a menos que sea completamente correcto. La nota puede ser 0, 0,25 o 0,5. La suma total no debe superar 3 puntos según esta rúbrica:
+Eres un profesor de inglés. Evalúa el siguiente writing para un nivel B1-B2. Evalúa de forma realista y crítica. No asignes 0.5 a un criterio a menos que sea completamente correcto. La nota puede ser 0, 0.25 o 0.5. La suma total no debe superar 3 puntos según esta rúbrica: según esta rúbrica:
 
 ADECUACIÓN (máximo 1.5 puntos)
 - Cumplimiento de la tarea, registro y extensión (0.5)
@@ -54,7 +54,8 @@ Devolverás solo un JSON con los siguientes campos y ningún texto adicional:
     "Ortografia": "detalles"
   }},
   "Errores_Detectados": "Lista detallada de errores detectados en cada aspecto de la rúbrica, explicando por qué son errores y cómo se podrían corregir o mejorar cada uno de ellos.",
-  "Feedback": "Texto detallado explicando cómo mejorar en cada criterio de la rúbrica, basado en los errores concretos detectados"
+  "Feedback": "Texto detallado explicando cómo mejorar en cada criterio de la rúbrica, basado en los errores concretos detectados.",
+  "Writing_Reescrito": "Texto reescrito por la IA para obtener la nota máxima de 3/3."
 }}
 
 Texto a evaluar:
@@ -105,7 +106,16 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
         except:
             pass
         doc.add_heading("Writing original", level=1)
-        doc.add_paragraph(texto_alumno)
+        p = doc.add_paragraph()
+        errores = data.get("Errores_Detectados", "").lower()
+        for word in texto_alumno.split():
+            run = p.add_run(word + " ")
+            if any(e in word.lower() for e in ["grammar", "tenses", "verb", "conjugation"] if e in errores):
+            run.font.highlight_color = 6  # Red highlight
+        elif any(e in word.lower() for e in ["cohesion", "coherence", "understand"] if e in errores):
+            run.font.highlight_color = 7  # Yellow highlight
+        elif any(e in word.lower() for e in ["vocabulary", "lexis", "word choice"] if e in errores):
+            run.font.highlight_color = 11  # Blue highlight
         doc.add_heading("Resultado de la rúbrica", level=1)
         for k, v in criterios.items():
             doc.add_paragraph(f"{k}: {v}/0.5")
@@ -114,7 +124,7 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
         doc.add_heading("Feedback detallado", level=1)
         doc.add_paragraph(data.get("Feedback", "No disponible"))
         doc.add_heading("Writing reescrito para nota máxima (3/3)", level=1)
-        doc.add_paragraph("[Espacio para sugerencia del profesor]")
+        doc.add_paragraph(data.get("Writing_Reescrito", "Texto reescrito no disponible"))
         buffer = io.BytesIO()
         doc.save(buffer)
         buffer.seek(0)
