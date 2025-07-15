@@ -18,13 +18,13 @@ if not openai.api_key:
     st.error("❌ No se ha configurado la clave API de OpenAI. Añádela en Secrets como OPENAI_API_KEY.")
     st.stop()
 
-st.set_page_config(page_title="Corrección de Writings", page_icon="✍️")
+st.set_page_config(page_title="Writing correction B1-B2", page_icon="✍️")
 st.title("✍️ Writing correction - Bachillerato")
 texto_alumno = st.text_area("📄 Pega aquí el writing del alumno:", height=200)
 
 def evaluar_rubrica_con_gpt(texto_alumno):
     prompt = f"""
-Eres un profesor de inglés. Evalúa el siguiente writing para un nivel B2 según esta rúbrica:
+Eres un profesor de inglés. Evalúa el siguiente writing para un nivel B1-B2 según esta rúbrica:
 
 ADECUACIÓN (máximo 1.5 puntos)
 - Cumplimiento de la tarea, registro y extensión (0.5)
@@ -39,22 +39,22 @@ EXPRESIÓN (máximo 1.5 puntos)
 Devolverás solo un JSON con los siguientes campos y ningún texto adicional:
 
 {
-  \"Adecuacion_Cumplimiento\": 0.5,
-  \"Adecuacion_Variedad\": 0.5,
-  \"Adecuacion_Cohesion\": 0.5,
-  \"Expresion_Gramatica\": 0.5,
-  \"Expresion_Vocabulario\": 0.5,
-  \"Expresion_Ortografia\": 0.5,
-  \"Justificaciones\": {
-    \"Cumplimiento\": \"detalles\",
-    \"Variedad\": \"detalles\",
-    \"Cohesion\": \"detalles\",
-    \"Gramatica\": \"detalles\",
-    \"Vocabulario\": \"detalles\",
-    \"Ortografia\": \"detalles\"
+  "Adecuacion_Cumplimiento": 0.5,
+  "Adecuacion_Variedad": 0.5,
+  "Adecuacion_Cohesion": 0.5,
+  "Expresion_Gramatica": 0.5,
+  "Expresion_Vocabulario": 0.5,
+  "Expresion_Ortografia": 0.5,
+  "Justificaciones": {
+    "Cumplimiento": "detalles",
+    "Variedad": "detalles",
+    "Cohesion": "detalles",
+    "Gramatica": "detalles",
+    "Vocabulario": "detalles",
+    "Ortografia": "detalles"
   },
-  \"Errores_Detectados\": \"lista detallada\",
-  \"Feedback\": \"texto detallado explicando cómo mejorar\"
+  "Errores_Detectados": "lista detallada",
+  "Feedback": "texto detallado explicando cómo mejorar"
 }
 
 Texto a evaluar:
