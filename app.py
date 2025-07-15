@@ -53,8 +53,8 @@ Devolverás solo un JSON con los siguientes campos y ningún texto adicional:
     "Vocabulario": "detalles",
     "Ortografia": "detalles"
   }},
-  "Errores_Detectados": "lista detallada",
-  "Feedback": "texto detallado explicando cómo mejorar"
+  "Errores_Detectados": "Lista detallada de errores detectados en cada aspecto de la rúbrica, explicando por qué son errores y cómo se podrían corregir o mejorar cada uno de ellos.",
+  "Feedback": "Texto detallado explicando cómo mejorar en cada criterio de la rúbrica, basado en los errores concretos detectados"
 }}
 
 Texto a evaluar:
