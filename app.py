@@ -1,5 +1,10 @@
 import streamlit as st
 import json
+import io
+from docx import Document
+from docx.shared import Pt
+from fpdf import FPDF
+from PIL import Image
 
 try:
     import openai
@@ -17,12 +22,9 @@ st.set_page_config(page_title="Corrección de Writings", page_icon="✍️")
 st.title("✍️ Corrección de Writings con IA y Rúbrica dinámica")
 texto_alumno = st.text_area("📄 Pega aquí el writing del alumno:", height=200)
 
-def evaluar_rubrica_con_gpt(text):
-    if not openai.api_key:
-        return "❌ OpenAI API key no configurada."
-
+def evaluar_rubrica_con_gpt(texto_alumno):
     prompt = f"""
-Eres un profesor que evalúa un writing en inglés con esta rúbrica (puntuaciones máximas indicadas):
+Eres un profesor que evalúa un writing en inglés con esta rúbrica:
 
 ADECUACIÓN (máximo 1.5 puntos)
 - Cumplimiento de la tarea, registro y extensión (0.5)
@@ -34,94 +36,104 @@ EXPRESIÓN (máximo 1.5 puntos)
 - Vocabulario y riqueza léxica (0.5)
 - Ortografía y puntuación (0.5)
 
-Evalúa el texto siguiente y asigna una nota **(0, 0.25 o 0.5)** para cada criterio según los errores detectados.
-IMPORTANTE: No añadas explicaciones ni texto antes o después del JSON. Devuelve solo un objeto JSON válido, sin formato adicional.
-
-Además, para cada criterio, incluye en "Justificaciones" los errores concretos que observas y en "Feedback" escribe un texto largo explicando cómo mejorar específicamente cada apartado.
-
-Texto: '''{text}'''
+Evalúa el texto y devuelve solo un JSON con notas, justificaciones, errores concretos y un feedback detallado, siguiendo este formato:
 
 {{
-  "Adecuacion_Cumplimiento": valor_numérico,
-  "Adecuacion_Variedad": valor_numérico,
-  "Adecuacion_Cohesion": valor_numérico,
-  "Expresion_Gramatica": valor_numérico,
-  "Expresion_Vocabulario": valor_numérico,
-  "Expresion_Ortografia": valor_numérico,
-  "Justificaciones": {{
-    "Cumplimiento": "errores detectados y explicación",
-    "Variedad": "errores detectados y explicación",
-    "Cohesion": "errores detectados y explicación",
-    "Gramatica": "errores detectados y explicación",
-    "Vocabulario": "errores detectados y explicación",
-    "Ortografia": "errores detectados y explicación"
-  }},
-  "Errores_Detectados": "Lista completa de errores cometidos por el alumno con ejemplos específicos y correcciones sugeridas.",
-  "Feedback": "Texto detallado explicando cómo mejorar en cada criterio."
+  "Adecuacion_Cumplimiento": 0.5,
+  "Adecuacion_Variedad": 0.5,
+  "Adecuacion_Cohesion": 0.5,
+  "Expresion_Gramatica": 0.5,
+  "Expresion_Vocabulario": 0.5,
+  "Expresion_Ortografia": 0.5,
+  "Justificaciones": {{...}},
+  "Errores_Detectados": "...",
+  "Feedback": "..."
 }}
+
+Texto a evaluar:
+'''{texto_alumno}'''
 """
 
-    try:
-        response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.0,
-            max_tokens=1000,
-        )
-        return response.choices[0].message.content
-    except openai.OpenAIError as e:
-        if "insufficient_quota" in str(e):
-            return "❌ OpenAI API error: Cuota agotada o insuficiente. Revisa tu plan en https://platform.openai.com/account/billing"
-        return f"❌ OpenAI API error: {e}"
+    response = openai.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.0,
+        max_tokens=1000,
+    )
+    return response.choices[0].message.content
 
 if st.button("✅ Corregir"):
-    if texto_alumno.strip() == "":
-        st.warning("⚠️ Por favor, introduce un texto para corregir.")
-    else:
+    if texto_alumno.strip():
         resultado_json = evaluar_rubrica_con_gpt(texto_alumno)
-        if resultado_json.startswith("❌ OpenAI API error"):
-            st.error(resultado_json)
-        else:
-            try:
-                start = resultado_json.find('{')
-                end = resultado_json.rfind('}') + 1
-                json_str = resultado_json[start:end]
-                data = json.loads(json_str)
-                
-                st.subheader("📊 Resultado de la rúbrica")
-                criterios = {
-                    "Cumplimiento de la tarea": data.get("Adecuacion_Cumplimiento", 0),
-                    "Variedad y organización": data.get("Adecuacion_Variedad", 0),
-                    "Cohesión y coherencia": data.get("Adecuacion_Cohesion", 0),
-                    "Gramática": data.get("Expresion_Gramatica", 0),
-                    "Vocabulario": data.get("Expresion_Vocabulario", 0),
-                    "Ortografía y puntuación": data.get("Expresion_Ortografia", 0)
-                }
+        try:
+            start = resultado_json.find('{')
+            end = resultado_json.rfind('}') + 1
+            json_str = resultado_json[start:end]
+            data = json.loads(json_str)
+            criterios = {
+                "Cumplimiento de la tarea": data.get("Adecuacion_Cumplimiento", 0),
+                "Variedad y organización": data.get("Adecuacion_Variedad", 0),
+                "Cohesión y coherencia": data.get("Adecuacion_Cohesion", 0),
+                "Gramática": data.get("Expresion_Gramatica", 0),
+                "Vocabulario": data.get("Expresion_Vocabulario", 0),
+                "Ortografía y puntuación": data.get("Expresion_Ortografia", 0)
+            }
+            st.session_state['criterios'] = criterios
+            st.session_state['data'] = data
+        except json.JSONDecodeError:
+            st.error("❌ La respuesta de la IA no es un JSON válido.") and 'data' in st.session_state:
+    criterios = st.session_state['criterios']
+    data = st.session_state['data']
 
-                total = sum(criterios.values())
+    if st.button("📥 Descargar informe en Word"):
+        doc = Document()
+        style = doc.styles['Normal']
+        font = style.font
+        font.name = 'Calibri'
+        font.size = Pt(11)
+        doc.add_heading("INFORME DE CORRECCIÓN - Writing", 0)
+        try:
+            doc.add_picture("logo_instituto.png", width=docx.shared.Inches(1.5))
+        except:
+            pass
+        doc.add_heading("Writing original", level=1)
+        doc.add_paragraph(texto_alumno)
+        doc.add_heading("Resultado de la rúbrica", level=1)
+        for k, v in criterios.items():
+            doc.add_paragraph(f"{k}: {v}/0.5")
+        doc.add_heading("Errores detectados", level=1)
+        doc.add_paragraph(data.get("Errores_Detectados", "No disponible"))
+        doc.add_heading("Feedback detallado", level=1)
+        doc.add_paragraph(data.get("Feedback", "No disponible"))
+        doc.add_heading("Writing reescrito para nota máxima (3/3)", level=1)
+        doc.add_paragraph("[Espacio para sugerencia del profesor]")
 
-                for criterio, nota in criterios.items():
-                    st.write(f"**{criterio}: {nota} / 0.5**")
-                    st.progress(min(nota / 0.5, 1.0))
-                    st.caption(data.get("Justificaciones", {}).get(criterio.split()[0], ""))
+        buffer = io.BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+        st.download_button("Descargar informe (Word)", data=buffer, file_name="informe_writing.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
-                st.success(f"✅ **Nota total: {round(total,2)} / 3**")
+    if st.button("📥 Descargar informe en PDF"):
+        pdf = FPDF()
+        pdf.add_page()
+        try:
+            pdf.image("logo_instituto.png", x=10, y=8, w=30)
+        except:
+            pass
+        pdf.set_font("Arial", 'B', size=14)
+        pdf.set_text_color(0, 0, 128)
+        pdf.multi_cell(0, 10, "INFORME DE CORRECCIÓN - Writing\n\n")
+        pdf.set_font("Arial", '', size=12)
+        pdf.set_text_color(0, 0, 0)
+        pdf.multi_cell(0, 10, f"Writing original:\n{texto_alumno}\n\n")
+        pdf.multi_cell(0, 10, "Resultado de la rúbrica:\n")
+        for k, v in criterios.items():
+            pdf.multi_cell(0, 10, f"{k}: {v}/0.5")
+        pdf.multi_cell(0, 10, f"\nErrores detectados:\n{data.get('Errores_Detectados', 'No disponible')}\n")
+        pdf.multi_cell(0, 10, f"\nFeedback detallado:\n{data.get('Feedback', 'No disponible')}\n")
+        pdf.multi_cell(0, 10, "\nWriting reescrito para nota máxima (3/3):\n[Espacio para sugerencia del profesor]")
 
-                st.markdown("""
-                <div style='background-color:#ffe6e6; padding:15px; border-radius:12px; border: 2px solid red; font-size:16px;'>
-                📋 <strong style='color:darkred;'>Errores detectados:</strong>
-                </div>""", unsafe_allow_html=True)
-                st.write(data.get("Errores_Detectados", "No disponible"))
-
-                st.markdown("""
-                <div style='background-color:#e6ffe6; padding:15px; border-radius:12px; border: 2px solid green; font-size:16px;'>
-                📝 <strong style='color:darkgreen;'>Feedback para el alumno:</strong>
-                </div>""", unsafe_allow_html=True)
-                st.write(data.get("Feedback", "No disponible"))
-
-            except json.JSONDecodeError:
-                st.error("❌ Error: La respuesta de la IA no es un JSON válido.")
-                st.text(resultado_json)
-            except Exception as e:
-                    st.error(f"❌ Error inesperado: {e}")
-                    st.stop()
+        buffer_pdf = io.BytesIO()
+        pdf.output(buffer_pdf)
+        buffer_pdf.seek(0)
+        st.download_button("Descargar informe (PDF)", data=buffer_pdf, file_name="informe_writing.pdf", mime="application/pdf")
