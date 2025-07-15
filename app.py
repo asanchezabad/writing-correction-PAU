@@ -38,8 +38,8 @@ EXPRESIÓN (máximo 1.5 puntos)
 
 Devolverás solo un JSON con los siguientes campos y ningún texto adicional:
 
-{{
-  "Adecuacion_Cumplimiento": 0.5,
+{{{
+  \"Adecuacion_Cumplimiento\": 0.5,
   "Adecuacion_Variedad": 0.5,
   "Adecuacion_Cohesion": 0.5,
   "Expresion_Gramatica": 0.5,
@@ -54,8 +54,8 @@ Devolverás solo un JSON con los siguientes campos y ningún texto adicional:
     "Ortografia": "detalles"
   },
   "Errores_Detectados": "lista detallada",
-  "Feedback": "texto detallado explicando cómo mejorar"
-}}
+  "Feedback": \"texto detallado explicando cómo mejorar\"
+}}}
 
 Texto a evaluar:
 '''{texto_alumno}'''
