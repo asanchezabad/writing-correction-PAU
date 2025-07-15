@@ -109,7 +109,7 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
         p = doc.add_paragraph()
         errores = data.get("Errores_Detectados", "").lower()
         for word in texto_alumno.split():
-        run = p.add_run(word + " ")
+            run = p.add_run(word + " ")
         if any(e in word.lower() for e in ["grammar", "tenses", "verb", "conjugation"] if e in errores):
                         run.font.highlight_color = 6  # Red highlight
         elif any(e in word.lower() for e in ["cohesion", "coherence", "understand"] if e in errores):
