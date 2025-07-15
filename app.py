@@ -136,58 +136,12 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
         errores_texto = data.get("Errores_Detectados", "No disponible")
         for seccion in errores_texto.split("✅"):
             if seccion.strip():
-                doc.add_heading(seccion.strip().splitlines()[0], level=2)
-                tabla = doc.add_table(rows=1, cols=3)
-                hdr_cells = tabla.rows[0].cells
-                hdr_cells[0].text = 'Error'
-                hdr_cells[1].text = 'Corrección'
-                hdr_cells[2].text = 'Explicación'
-                for linea in seccion.strip().splitlines():
-                    if '	' in linea:
-                        columnas = linea.split('	')
-                        if len(columnas) == 3:
-                            row_cells = tabla.add_row().cells
-                            row_cells[0].text = columnas[0].strip()
-                            row_cells[1].text = columnas[1].strip()
-                            row_cells[2].text = columnas[2].strip()
-        doc.add_heading("Feedback detallado", level=1)
-        doc.add_paragraph(data.get("Feedback", "No disponible"))
-        doc.add_heading("Writing reescrito para nota máxima (3/3)", level=1)
-        doc.add_paragraph(data.get("Writing_Reescrito", "Texto reescrito no disponible"))
-        buffer = io.BytesIO()
-        doc.save(buffer)
-        buffer.seek(0)
-        st.download_button("Descargar informe (Word)", data=buffer, file_name="informe_writing.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-
-    if st.button("📥 Descargar informe en PDF"):
-        pdf = FPDF()
-        pdf.add_page()
-        try:
-            pdf.image("logo_instituto.png", x=10, y=8, w=30)
-        except:
-            pass
-        pdf.set_font("Arial", 'B', size=14)
-        pdf.set_text_color(0, 0, 128)
-        pdf.multi_cell(0, 10, "INFORME DE CORRECCIÓN - Writing\n\n")
-        pdf.set_font("Arial", '', size=12)
-        pdf.set_text_color(0, 0, 0)
-        pdf.multi_cell(0, 10, f"Writing original:\n{texto_alumno}\n\n")
-        pdf.multi_cell(0, 10, "Resultado de la rúbrica:\n")
-        for k, v in criterios.items():
-            pdf.multi_cell(0, 10, f"{k}: {v}/0.5")
-        total_nota = sum(criterios.values())
-        pdf.multi_cell(0, 10, f"Nota total: {total_nota}/3")
-        nota_sobre_10 = round((total_nota / 3) * 10, 2)
-        pdf.multi_cell(0, 10, f"Nota total: {nota_sobre_10}/10")
-        errores_texto = data.get("Errores_Detectados", "No disponible")
-        for seccion in errores_texto.split("✅"):
-            if seccion.strip():
                 pdf.set_font("Arial", 'B', 12)
                 pdf.set_text_color(0, 0, 128)
                 pdf.multi_cell(0, 10, seccion.strip().splitlines()[0])
                 pdf.set_font("Arial", '', 10)
                 pdf.set_text_color(0, 0, 0)
-                for linea in seccion.strip().splitlines()
+                for linea in seccion.strip().splitlines():
                     if '	' in linea:
                         columnas = linea.split('	')
                         if len(columnas) == 3:
