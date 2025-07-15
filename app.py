@@ -142,8 +142,7 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
                 hdr_cells[0].text = 'Error'
                 hdr_cells[1].text = 'Corrección'
                 hdr_cells[2].text = 'Explicación'
-                for linea in seccion.strip().split("
-"):
+                for linea in seccion.strip().splitlines():
                     if '	' in linea:
                         columnas = linea.split('	')
                         if len(columnas) == 3:
