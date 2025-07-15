@@ -120,11 +120,11 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
             run = p.add_run(word + " ")
             if word in texto_alumno and word not in data.get("Writing_Reescrito", ""):
                 if any(e in "grammar tenses verb conjugation" for e in errores):
-                    run.font.highlight_color = 6  # Red highlight
+                    run.font.highlight_color = 6
                 elif any(e in "cohesion coherence understand" for e in errores):
-                    run.font.highlight_color = 7  # Yellow highlight
+                    run.font.highlight_color = 7
                 elif any(e in "vocabulary lexis word choice" for e in errores):
-                    run.font.highlight_color = 11  # Blue highlight
+                    run.font.highlight_color = 11
         doc.add_heading("Resultado de la rúbrica", level=1)
         for k, v in criterios.items():
             doc.add_paragraph(f"{k}: {v}/0.5")
@@ -136,20 +136,27 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
         errores_texto = data.get("Errores_Detectados", "No disponible")
         for seccion in errores_texto.split("✅"):
             if seccion.strip():
-                pdf.set_font("Arial", 'B', 12)
-                pdf.set_text_color(0, 0, 128)
-                pdf.multi_cell(0, 10, seccion.strip().splitlines()[0])
-                pdf.set_font("Arial", '', 10)
-                pdf.set_text_color(0, 0, 0)
+                doc.add_heading(seccion.strip().splitlines()[0], level=2)
+                tabla = doc.add_table(rows=1, cols=3)
+                hdr_cells = tabla.rows[0].cells
+                hdr_cells[0].text = 'Error'
+                hdr_cells[1].text = 'Corrección'
+                hdr_cells[2].text = 'Explicación'
                 for linea in seccion.strip().splitlines():
                     if '	' in linea:
                         columnas = linea.split('	')
                         if len(columnas) == 3:
-                            pdf.multi_cell(0, 5, f"Error: {columnas[0].strip()} | Corrección: {columnas[1].strip()} | Explicación: {columnas[2].strip()}")
-        pdf.multi_cell(0, 10, f"\nFeedback detallado:\n{data.get('Feedback', 'No disponible')}\n")
-        pdf.multi_cell(0, 10, "\nWriting reescrito para nota máxima (3/3):\n[Espacio para sugerencia del profesor]")
-        buffer_pdf = io.BytesIO()
-        pdf_bytes = pdf.output(dest='S').encode('latin1')
-        buffer_pdf = io.BytesIO(pdf_bytes)
-        buffer_pdf.seek(0)
-        st.download_button("Descargar informe (PDF)", data=buffer_pdf, file_name="informe_writing.pdf", mime="application/pdf")
+                            row_cells = tabla.add_row().cells
+                            row_cells[0].text = columnas[0].strip()
+                            row_cells[1].text = columnas[1].strip()
+                            row_cells[2].text = columnas[2].strip()
+        doc.add_heading("Feedback detallado", level=1)
+        feedback_texto = data.get("Feedback", "No disponible").replace("
+", " ").strip()
+        doc.add_paragraph(f"Feedback detallado: {feedback_texto}")
+        doc.add_heading("Writing reescrito para nota máxima (3/3)", level=1)
+        doc.add_paragraph(data.get("Writing_Reescrito", "Texto reescrito no disponible"))
+        buffer = io.BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+        st.download_button("Descargar informe (Word)", data=buffer, file_name="informe_writing.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
