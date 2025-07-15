@@ -136,8 +136,7 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
         errores_texto = data.get("Errores_Detectados", "No disponible")
         for seccion in errores_texto.split("✅"):
             if seccion.strip():
-                doc.add_heading(seccion.strip().split("
-")[0], level=2)
+                doc.add_heading(seccion.strip().splitlines()[0], level=2)
                 tabla = doc.add_table(rows=1, cols=3)
                 hdr_cells = tabla.rows[0].cells
                 hdr_cells[0].text = 'Error'
