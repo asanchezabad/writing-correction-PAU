@@ -39,22 +39,22 @@ EXPRESIÓN (máximo 1.5 puntos)
 Devolverás solo un JSON con los siguientes campos y ningún texto adicional:
 
 {{
-  \"Adecuacion_Cumplimiento\": 0.5,
+  "Adecuacion_Cumplimiento": 0.5,
   "Adecuacion_Variedad": 0.5,
   "Adecuacion_Cohesion": 0.5,
   "Expresion_Gramatica": 0.5,
   "Expresion_Vocabulario": 0.5,
   "Expresion_Ortografia": 0.5,
-  "Justificaciones": {
+  "Justificaciones": {{
     "Cumplimiento": "detalles",
     "Variedad": "detalles",
     "Cohesion": "detalles",
     "Gramatica": "detalles",
     "Vocabulario": "detalles",
     "Ortografia": "detalles"
-  },
+  }},
   "Errores_Detectados": "lista detallada",
-  "Feedback": \"texto detallado explicando cómo mejorar\"
+  "Feedback": "texto detallado explicando cómo mejorar"
 }}
 
 Texto a evaluar:
@@ -87,8 +87,6 @@ if st.button("✅ Corregir"):
             st.session_state['criterios'] = criterios
             st.session_state['data'] = data
             st.session_state['corregido'] = True
-        except json.JSONDecodeError:
-            st.error("❌ La respuesta de la IA no es un JSON válido.")
         except json.JSONDecodeError:
             st.error("❌ La respuesta de la IA no es un JSON válido.")
 
