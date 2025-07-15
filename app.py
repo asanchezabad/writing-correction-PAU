@@ -24,7 +24,7 @@ texto_alumno = st.text_area("📄 Pega aquí el writing del alumno:", height=200
 
 def evaluar_rubrica_con_gpt(texto_alumno):
     prompt = f"""
-Eres un profesor de inglés. Evalúa el siguiente writing para un nivel B1-B2. Evalúa de forma realista y crítica. No asignes 0.5 a un criterio a menos que sea completamente correcto. La nota puede ser 0, 0.25 o 0.5. Valora solamente con 0 si está completamente mal. La suma total no debe superar 3 puntos según esta rúbrica: según esta rúbrica:
+Eres un profesor de inglés. Evalúa el siguiente writing para un nivel B1-B2. Evalúa de forma realista y crítica. No asignes 0.5 a un criterio a menos que sea completamente correcto. La nota puede ser 0, 0.25 o 0.5. La suma total no debe superar 3 puntos según esta rúbrica: según esta rúbrica:
 
 ADECUACIÓN (máximo 1.5 puntos)
 - Cumplimiento de la tarea, registro y extensión (0.5)
@@ -53,7 +53,10 @@ Devolverás solo un JSON con los siguientes campos y ningún texto adicional:
     "Vocabulario": "detalles",
     "Ortografia": "detalles"
   }},
-  "Errores_Detectados": "Lista detallada de errores detectados en cada aspecto de la rúbrica, explicando por qué son errores y cómo se podrían corregir o mejorar cada uno de ellos.",
+  "Errores_Detectados": "Lista completa de errores detectados, estructurada en secciones por tipo de error: por ejemplo, errores de conjugación, uso de artículos, concordancia, preposiciones, puntuación, estructuras confusas y capitalización. Cada error debe presentarse en una tabla con columnas de Error original, Corrección sugerida y Explicación, siguiendo el formato: ✅ 1. Tipo de error.
+Error	Corrección	Explicación
+...
+.",
   "Feedback": "Texto detallado explicando cómo mejorar en cada criterio de la rúbrica, basado en los errores concretos detectados.",
   "Writing_Reescrito": "Texto reescrito por la IA para obtener la nota máxima de 3/3."
 }}
@@ -121,7 +124,25 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
         for k, v in criterios.items():
             doc.add_paragraph(f"{k}: {v}/0.5")
         doc.add_heading("Errores detectados", level=1)
-        doc.add_paragraph(data.get("Errores_Detectados", "No disponible"))
+        errores_texto = data.get("Errores_Detectados", "No disponible")
+        for seccion in errores_texto.split("✅"):
+            if seccion.strip():
+                doc.add_heading(seccion.strip().split("
+")[0], level=2)
+                tabla = doc.add_table(rows=1, cols=3)
+                hdr_cells = tabla.rows[0].cells
+                hdr_cells[0].text = 'Error'
+                hdr_cells[1].text = 'Corrección'
+                hdr_cells[2].text = 'Explicación'
+                for linea in seccion.strip().split("
+"):
+                    if '	' in linea:
+                        columnas = linea.split('	')
+                        if len(columnas) == 3:
+                            row_cells = tabla.add_row().cells
+                            row_cells[0].text = columnas[0].strip()
+                            row_cells[1].text = columnas[1].strip()
+                            row_cells[2].text = columnas[2].strip()
         doc.add_heading("Feedback detallado", level=1)
         doc.add_paragraph(data.get("Feedback", "No disponible"))
         doc.add_heading("Writing reescrito para nota máxima (3/3)", level=1)
@@ -147,7 +168,21 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
         pdf.multi_cell(0, 10, "Resultado de la rúbrica:\n")
         for k, v in criterios.items():
             pdf.multi_cell(0, 10, f"{k}: {v}/0.5")
-        pdf.multi_cell(0, 10, f"\nErrores detectados:\n{data.get('Errores_Detectados', 'No disponible')}\n")
+        errores_texto = data.get("Errores_Detectados", "No disponible")
+        for seccion in errores_texto.split("✅"):
+            if seccion.strip():
+                pdf.set_font("Arial", 'B', 12)
+                pdf.set_text_color(0, 0, 128)
+                pdf.multi_cell(0, 10, seccion.strip().split("
+")[0])
+                pdf.set_font("Arial", '', 10)
+                pdf.set_text_color(0, 0, 0)
+                for linea in seccion.strip().split("
+"):
+                    if '	' in linea:
+                        columnas = linea.split('	')
+                        if len(columnas) == 3:
+                            pdf.multi_cell(0, 5, f"Error: {columnas[0].strip()} | Corrección: {columnas[1].strip()} | Explicación: {columnas[2].strip()}")
         pdf.multi_cell(0, 10, f"\nFeedback detallado:\n{data.get('Feedback', 'No disponible')}\n")
         pdf.multi_cell(0, 10, "\nWriting reescrito para nota máxima (3/3):\n[Espacio para sugerencia del profesor]")
         buffer_pdf = io.BytesIO()
