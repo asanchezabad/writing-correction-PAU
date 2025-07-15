@@ -24,7 +24,7 @@ texto_alumno = st.text_area("📄 Pega aquí el writing del alumno:", height=200
 
 def evaluar_rubrica_con_gpt(texto_alumno):
     prompt = f"""
-Eres un profesor de inglés. Evalúa el siguiente writing para un nivel B1-B2. Evalúa de forma realista y crítica. No asignes 0.5 a un criterio a menos que sea completamente correcto. La nota puede ser 0, 0.25 o 0.5. La suma total no debe superar 3 puntos según esta rúbrica: según esta rúbrica:
+Eres un profesor de inglés. Evalúa el siguiente writing para un nivel B1-B2. Evalúa de forma realista y crítica. No asignes 0.5 a un criterio a menos que sea completamente correcto. La nota puede ser 0, 0.25 o 0.5. Valora solamente con 0 si está completamente mal. La suma total no debe superar 3 puntos según esta rúbrica: según esta rúbrica:
 
 ADECUACIÓN (máximo 1.5 puntos)
 - Cumplimiento de la tarea, registro y extensión (0.5)
