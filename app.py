@@ -53,7 +53,12 @@ Devolverás solo un JSON con los siguientes campos y ningún texto adicional:
     "Vocabulario": "detalles",
     "Ortografia": "detalles"
   }},
-  "Errores_Detectados": "Lista completa de errores detectados, estructurada en secciones por tipo de error: por ejemplo, errores de conjugación, uso de artículos, concordancia, preposiciones, puntuación, estructuras confusas y capitalización. Cada error debe presentarse en una tabla con columnas de Error original, Corrección sugerida y Explicación, siguiendo el formato: ✅ 1. Tipo de error.
+  "Errores_Detectados": "Lista completa de errores detectados, organizada por tipo de error (conjugación, artículos, concordancia, preposiciones, puntuación, estructuras confusas, capitalización). Cada sección debe empezar por ✅ seguido del número y tipo de error. A continuación, para cada error se presentará una tabla en texto plano con las columnas Error original, Corrección sugerida y Explicación, separadas por tabuladores (	), siguiendo el formato: 
+
+✅ 1. Tipo de error
+Error	Corrección	Explicación
+Texto original	Texto corregido	Motivo de la corrección
+...", siguiendo el formato: ✅ 1. Tipo de error.
 Error	Corrección	Explicación
 ...
 .",
@@ -123,6 +128,10 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
         doc.add_heading("Resultado de la rúbrica", level=1)
         for k, v in criterios.items():
             doc.add_paragraph(f"{k}: {v}/0.5")
+        total_nota = sum(criterios.values())
+        doc.add_paragraph(f"Nota total: {total_nota}/3")
+        nota_sobre_10 = round((total_nota / 3) * 10, 2)
+        doc.add_paragraph(f"Nota total: {nota_sobre_10}/10")
         doc.add_heading("Errores detectados", level=1)
         errores_texto = data.get("Errores_Detectados", "No disponible")
         for seccion in errores_texto.split("✅"):
@@ -168,6 +177,10 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
         pdf.multi_cell(0, 10, "Resultado de la rúbrica:\n")
         for k, v in criterios.items():
             pdf.multi_cell(0, 10, f"{k}: {v}/0.5")
+        total_nota = sum(criterios.values())
+        pdf.multi_cell(0, 10, f"Nota total: {total_nota}/3")
+        nota_sobre_10 = round((total_nota / 3) * 10, 2)
+        pdf.multi_cell(0, 10, f"Nota total: {nota_sobre_10}/10")
         errores_texto = data.get("Errores_Detectados", "No disponible")
         for seccion in errores_texto.split("✅"):
             if seccion.strip():
