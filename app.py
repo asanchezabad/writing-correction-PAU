@@ -185,11 +185,9 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
                 pdf.set_font("Arial", 'B', 12)
                 pdf.set_text_color(0, 0, 128)
                 pdf.multi_cell(0, 10, seccion.strip().splitlines()[0])
-")[0])
                 pdf.set_font("Arial", '', 10)
                 pdf.set_text_color(0, 0, 0)
                 for linea in seccion.strip().splitlines()
-"):
                     if '	' in linea:
                         columnas = linea.split('	')
                         if len(columnas) == 3:
