@@ -2,7 +2,7 @@ import streamlit as st
 import json
 import io
 from docx import Document
-from docx.shared import Pt
+from docx.shared import Pt, Inches
 from fpdf import FPDF
 from PIL import Image
 
@@ -23,37 +23,11 @@ st.title("✍️ Corrección de Writings con IA y Rúbrica dinámica")
 texto_alumno = st.text_area("📄 Pega aquí el writing del alumno:", height=200)
 
 def evaluar_rubrica_con_gpt(texto_alumno):
-    prompt = f"""
-Eres un profesor que evalúa un writing en inglés con esta rúbrica:
-
-ADECUACIÓN (máximo 1.5 puntos)
-- Cumplimiento de la tarea, registro y extensión (0.5)
-- Variedad y organización de ideas (0.5)
-- Cohesión y coherencia (0.5)
-
-EXPRESIÓN (máximo 1.5 puntos)
-- Gramática y estructuras (0.5)
-- Vocabulario y riqueza léxica (0.5)
-- Ortografía y puntuación (0.5)
-
-Evalúa el texto y devuelve solo un JSON con notas, justificaciones, errores concretos y un feedback detallado, siguiendo este formato:
-
-{{
-  "Adecuacion_Cumplimiento": 0.5,
-  "Adecuacion_Variedad": 0.5,
-  "Adecuacion_Cohesion": 0.5,
-  "Expresion_Gramatica": 0.5,
-  "Expresion_Vocabulario": 0.5,
-  "Expresion_Ortografia": 0.5,
-  "Justificaciones": {{...}},
-  "Errores_Detectados": "...",
-  "Feedback": "..."
-}}
-
+    prompt = f"""Eres un profesor que evalúa un writing en inglés con esta rúbrica:
+... (instrucciones igual que antes) ...
 Texto a evaluar:
 '''{texto_alumno}'''
 """
-
     response = openai.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
@@ -80,11 +54,15 @@ if st.button("✅ Corregir"):
             }
             st.session_state['criterios'] = criterios
             st.session_state['data'] = data
+            st.session_state['corregido'] = True
         except json.JSONDecodeError:
-            st.error("❌ La respuesta de la IA no es un JSON válido.") and 'data' in st.session_state:
+            st.error("❌ La respuesta de la IA no es un JSON válido.")
+        except json.JSONDecodeError:
+            st.error("❌ La respuesta de la IA no es un JSON válido.")
+
+if 'criterios' in st.session_state and 'data' in st.session_state:
     criterios = st.session_state['criterios']
     data = st.session_state['data']
-
     if st.button("📥 Descargar informe en Word"):
         doc = Document()
         style = doc.styles['Normal']
@@ -93,7 +71,7 @@ if st.button("✅ Corregir"):
         font.size = Pt(11)
         doc.add_heading("INFORME DE CORRECCIÓN - Writing", 0)
         try:
-            doc.add_picture("logo_instituto.png", width=docx.shared.Inches(1.5))
+            doc.add_picture("logo_instituto.png", width=Inches(1.5))
         except:
             pass
         doc.add_heading("Writing original", level=1)
@@ -107,7 +85,6 @@ if st.button("✅ Corregir"):
         doc.add_paragraph(data.get("Feedback", "No disponible"))
         doc.add_heading("Writing reescrito para nota máxima (3/3)", level=1)
         doc.add_paragraph("[Espacio para sugerencia del profesor]")
-
         buffer = io.BytesIO()
         doc.save(buffer)
         buffer.seek(0)
@@ -132,7 +109,6 @@ if st.button("✅ Corregir"):
         pdf.multi_cell(0, 10, f"\nErrores detectados:\n{data.get('Errores_Detectados', 'No disponible')}\n")
         pdf.multi_cell(0, 10, f"\nFeedback detallado:\n{data.get('Feedback', 'No disponible')}\n")
         pdf.multi_cell(0, 10, "\nWriting reescrito para nota máxima (3/3):\n[Espacio para sugerencia del profesor]")
-
         buffer_pdf = io.BytesIO()
         pdf.output(buffer_pdf)
         buffer_pdf.seek(0)
