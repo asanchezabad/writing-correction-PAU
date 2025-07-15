@@ -141,6 +141,6 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
         pdf.multi_cell(0, 10, "\nWriting reescrito para nota máxima (3/3):\n[Espacio para sugerencia del profesor]")
         buffer_pdf = io.BytesIO()
         pdf_bytes = pdf.output(dest='S').encode('latin1')
-buffer_pdf = io.BytesIO(pdf_bytes)
+        buffer_pdf = io.BytesIO(pdf_bytes)
         buffer_pdf.seek(0)
         st.download_button("Descargar informe (PDF)", data=buffer_pdf, file_name="informe_writing.pdf", mime="application/pdf")
