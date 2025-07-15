@@ -110,12 +110,13 @@ if 'criterios' in st.session_state and 'data' in st.session_state:
         errores = data.get("Errores_Detectados", "").lower()
         for word in texto_alumno.split():
             run = p.add_run(word + " ")
-        if any(e in word.lower() for e in ["grammar", "tenses", "verb", "conjugation"] if e in errores):
-                        run.font.highlight_color = 6  # Red highlight
-        elif any(e in word.lower() for e in ["cohesion", "coherence", "understand"] if e in errores):
-            run.font.highlight_color = 7  # Yellow highlight
-        elif any(e in word.lower() for e in ["vocabulary", "lexis", "word choice"] if e in errores):
-            run.font.highlight_color = 11  # Blue highlight
+            if word in texto_alumno and word not in data.get("Writing_Reescrito", ""):
+                if any(e in "grammar tenses verb conjugation" for e in errores):
+                    run.font.highlight_color = 6  # Red highlight
+                elif any(e in "cohesion coherence understand" for e in errores):
+                    run.font.highlight_color = 7  # Yellow highlight
+                elif any(e in "vocabulary lexis word choice" for e in errores):
+                    run.font.highlight_color = 11  # Blue highlight
         doc.add_heading("Resultado de la rúbrica", level=1)
         for k, v in criterios.items():
             doc.add_paragraph(f"{k}: {v}/0.5")
